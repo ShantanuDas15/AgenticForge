@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { KeyRound, Lock, ArrowRight, Layers, Eye, EyeOff } from 'lucide-react';
+import { KeyRound, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import useUIStore from '@/store/useUIStore';
 import apiClient from '@/services/apiClient';
@@ -103,8 +103,8 @@ function ResetPassword() {
 
       <div className="glass-card w-full max-w-md p-8 shadow-2xl relative z-10 border-forge-accent/30 animate-in fade-in zoom-in-95 duration-500">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-forge-surface/50 border border-forge-border rounded-xl flex items-center justify-center shadow-lg mb-4 backdrop-blur-md">
-            <Layers className="text-forge-accent" size={28} />
+          <div className="w-14 h-14 bg-forge-surface/50 border border-forge-border rounded-xl flex items-center justify-center shadow-lg mb-4 backdrop-blur-md overflow-hidden">
+            <img src="/favicon.jpg" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-forge-text tracking-tight">AgenticForge</h1>
           <p className="text-forge-muted-text text-sm mt-2 text-center max-w-xs">

@@ -9,7 +9,7 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute';
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
 const Workspace = React.lazy(() => import('@/pages/Workspace'));
 const Login = React.lazy(() => import('@/pages/Login'));
-const Settings = React.lazy(() => import('@/pages/Settings'));
+const AccountBilling = React.lazy(() => import('@/pages/AccountBilling'));
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
 
 /**
@@ -46,7 +46,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/"          element={<Dashboard />} />
               <Route path="/workspace" element={<Workspace />} />
-              <Route path="/settings"  element={<Settings />} />
+              <Route path="/account-billing"  element={<AccountBilling />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -60,7 +60,7 @@ function SourceControlPanel() {
         <p className="text-sm text-forge-muted-text mb-6">
           Source Control integration requires an active subscription tier.
         </p>
-        <Button onClick={() => navigate('/settings?tab=billing')} className="w-full py-2.5 shadow-lg shadow-forge-accent/20">
+        <Button onClick={() => navigate('/account-billing?tab=billing')} className="w-full py-2.5 shadow-lg shadow-forge-accent/20">
           Upgrade to Pro Architect
         </Button>
       </div>

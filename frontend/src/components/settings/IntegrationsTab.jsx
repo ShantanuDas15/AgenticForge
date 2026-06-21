@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Github, Link } from 'lucide-react';
+import { GitBranch, Link } from 'lucide-react';
 import useUIStore from '@/store/useUIStore';
 import useSettingsStore from '@/store/useSettingsStore';
 import apiClient from '@/services/apiClient';
@@ -49,7 +49,7 @@ export default function IntegrationsTab() {
         <div className="flex items-center justify-between p-5 bg-zinc-900 border border-forge-border rounded-lg">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">
-              <Github size={24} className="text-white" />
+              <GitBranch size={24} className="text-white" />
             </div>
             <div>
               <h3 className="text-white font-bold">GitHub</h3>

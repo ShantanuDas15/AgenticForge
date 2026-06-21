@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Layers, ArrowLeft, CreditCard, Activity, User as UserIcon, Shield, Edit2, Check, X, Link2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Activity, User as UserIcon, Shield, Edit2, Check, X, Link2 } from 'lucide-react';
 import useAuthStore from '@/store/useAuthStore';
 import useSettingsStore from '@/store/useSettingsStore';
 import useUIStore from '@/store/useUIStore';
@@ -15,7 +15,7 @@ import { API_ROUTES } from '@/config/constants';
 /**
  * Settings — The global SaaS configuration dashboard covering User Profile, Billing, and Usage.
  */
-function Settings() {
+function AccountBilling() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
@@ -99,7 +99,7 @@ function Settings() {
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <Layers className="text-forge-accent" size={24} />
+          <img src="/favicon.jpg" alt="Logo" className="w-6 h-6 rounded object-cover" />
           <h1 className="text-lg font-bold tracking-wide bg-gradient-to-r from-forge-accent to-forge-coder bg-clip-text text-transparent">
             AgenticForge
           </h1>
@@ -244,4 +244,4 @@ function Settings() {
   );
 }
 
-export default Settings;
+export default AccountBilling;

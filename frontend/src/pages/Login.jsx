@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layers, Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import useAuthStore from '@/store/useAuthStore';
 import useUIStore from '@/store/useUIStore';
@@ -53,6 +53,10 @@ function Login() {
   const [showForgotPwd, setShowForgotPwd] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const isFormValid = isLogin 
+    ? email.trim() !== '' && password !== ''
+    : email.trim() !== '' && password !== '' && confirmPassword !== '' && name.trim() !== '';
   
   const navigate = useNavigate();
   const { login, register, isLoading } = useAuthStore();
@@ -136,8 +140,8 @@ function Login() {
 
       <div className="glass-card w-full max-w-md p-8 shadow-2xl relative z-10 border-forge-accent/30 animate-in fade-in zoom-in-95 duration-500">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-forge-surface/50 border border-forge-border rounded-xl flex items-center justify-center shadow-lg mb-4 backdrop-blur-md">
-            <Layers className="text-forge-accent" size={28} />
+          <div className="w-14 h-14 bg-forge-surface/50 border border-forge-border rounded-xl flex items-center justify-center shadow-lg mb-4 backdrop-blur-md overflow-hidden">
+            <img src="/favicon.jpg" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-forge-text tracking-tight">AgenticForge</h1>
           <p className="text-forge-muted-text text-sm mt-2 text-center max-w-xs">
@@ -251,7 +255,12 @@ function Login() {
             </div>
           )}
 
-          <Button type="submit" isLoading={isLoading} className="w-full py-3.5 mt-2 flex items-center justify-center gap-2 text-base shadow-xl shadow-forge-accent/20">
+          <Button 
+            type="submit" 
+            isLoading={isLoading} 
+            disabled={!isFormValid || isLoading}
+            className={`w-full py-3.5 mt-2 flex items-center justify-center gap-2 text-base shadow-xl transition-all duration-300 ${isFormValid ? 'shadow-forge-accent/20 hover:shadow-forge-accent/40' : 'opacity-50 cursor-not-allowed saturate-50'}`}
+          >
             {isLogin ? 'Initialize Session' : 'Create Account'}
             {!isLoading && <ArrowRight size={18} strokeWidth={2.5} />}
           </Button>

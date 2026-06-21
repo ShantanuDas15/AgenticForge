@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { History, Layers, Plus, Loader2, LogOut, Settings as SettingsIcon, User } from 'lucide-react';
+import { History, Plus, Loader2, LogOut, Settings as SettingsIcon, User } from 'lucide-react';
 import useProjectStore from '@/store/useProjectStore';
 import useFlowStore from '@/store/useFlowStore';
 import useAuthStore from '@/store/useAuthStore';
@@ -39,7 +39,7 @@ function Dashboard() {
       {/* Global App Header (Dashboard Context) */}
       <header className="h-16 border-b border-forge-border bg-forge-surface/80 backdrop-blur-md flex items-center justify-between px-8 shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <Layers className="text-forge-accent" size={26} />
+          <img src="/favicon.jpg" alt="Logo" className="w-7 h-7 rounded object-cover" />
           <h1 className="text-xl font-bold tracking-wide bg-gradient-to-r from-forge-accent to-forge-coder bg-clip-text text-transparent">
             AgenticForge
           </h1>
@@ -62,7 +62,7 @@ function Dashboard() {
             </div>
           </div>
           <button 
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/account-billing')}
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             title="Account & Billing"
           >

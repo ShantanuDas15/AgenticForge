@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ReactFlow, Background, Controls } from '@xyflow/react';
-import { Settings, MessageSquare, GitBranch, Rocket, Loader2, AlertTriangle } from 'lucide-react';
+import { Settings, MessageSquare, GitBranch, Rocket, Loader2, AlertTriangle, Sparkles, XCircle } from 'lucide-react';
 import '@xyflow/react/dist/style.css';
 
 import useFlowStore from '@/store/useFlowStore';
@@ -113,27 +113,31 @@ function Workspace() {
     <div className="h-screen w-full flex flex-col bg-forge-bg text-forge-text overflow-hidden">
       
       {/* Top Header */}
-      <header className="h-14 border-b border-forge-border bg-forge-surface/50 flex items-center justify-between px-6 shrink-0 z-20">
-        <h1 className="text-lg font-bold bg-gradient-to-r from-forge-accent to-forge-coder bg-clip-text text-transparent cursor-pointer" onClick={() => navigate('/')}>
-          AgenticForge Workspace
-        </h1>
+      <header className="h-14 border-b border-forge-border bg-forge-surface/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-20 shadow-sm">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+          <img src="/favicon.jpg" alt="Logo" className="w-6 h-6 rounded object-cover group-hover:scale-105 transition-transform" />
+          <h1 className="text-lg font-bold bg-gradient-to-r from-forge-accent to-forge-coder bg-clip-text text-transparent">
+            AgenticForge
+          </h1>
+        </div>
         <div className="flex items-center gap-4">
           {isRunning && (
-            <span className="px-2 py-1 text-xs rounded-md bg-forge-accent/20 text-forge-accent font-medium">
+            <span className="px-2.5 py-1 text-xs rounded-full bg-forge-accent/10 border border-forge-accent/30 text-forge-accent font-medium shadow-sm animate-pulse">
               Iteration {iterationCount}/{MAX_ITERATIONS}
             </span>
           )}
           {threadId && (
-            <span className="px-2 py-1 text-xs rounded-md bg-forge-muted text-forge-muted-text font-mono">
-              Thread: {threadId}
+            <span className="px-2.5 py-1 text-xs rounded-full bg-forge-surface/60 border border-forge-border text-forge-muted-text font-mono shadow-sm">
+              Thread: {threadId.substring(0, 8)}
             </span>
           )}
           <button 
             onClick={() => useSettingsStore.getState().openSettings()}
-            className="p-1.5 text-zinc-400 hover:text-white rounded-lg transition-colors bg-forge-surface/50 border border-forge-border"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-300 hover:text-white rounded-lg transition-all bg-forge-surface border border-forge-border hover:bg-forge-surface/80 hover:shadow-md hover:border-forge-accent/50"
             title="Workspace Settings"
           >
-            <Settings size={18} />
+            <Settings size={16} className="text-forge-accent" />
+            <span>Settings</span>
           </button>
         </div>
       </header>
@@ -244,13 +248,20 @@ function Workspace() {
       </div>
 
       {/* Bottom Prompt Bar */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[650px] z-20">
-        <div className="glass-card p-2 flex items-end gap-2 shadow-2xl border-forge-accent/30 bg-forge-surface/90 backdrop-blur-xl">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[700px] z-20">
+        <div className="glass-card p-2 flex items-end gap-3 shadow-2xl border-forge-accent/40 bg-forge-surface/95 backdrop-blur-2xl rounded-2xl relative overflow-hidden group">
+          
+          <div className="absolute inset-0 bg-gradient-to-r from-forge-accent/5 to-forge-coder/5 pointer-events-none" />
+
+          <div className="p-3 text-forge-accent/70 shrink-0">
+            <Sparkles size={20} className="animate-pulse" />
+          </div>
+
           <Textarea 
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe the feature or app you want to forge..."
-            className="border-none bg-transparent shadow-none focus:ring-0 min-h-[44px] max-h-[150px] !text-base"
+            className="border-none bg-transparent shadow-none focus:ring-0 min-h-[44px] max-h-[150px] !text-base w-full pb-3 placeholder-zinc-500 relative z-10"
             disabled={isRunning}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -259,21 +270,21 @@ function Workspace() {
               }
             }}
           />
-          <div className="flex gap-2 mb-1 mr-1">
+          <div className="flex gap-2 mb-1.5 mr-1.5 relative z-10 shrink-0">
             {isRunning && (
               <button 
                 onClick={() => sendResume(threadId, false, "USER_ABORTED")}
-                className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded-lg shadow-lg transition-colors flex items-center justify-center group"
+                className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded-xl shadow-lg transition-colors flex items-center justify-center group/stop"
                 title="Stop Workflow"
               >
-                <div className="w-4 h-4 bg-red-500 rounded-sm group-hover:bg-red-400 transition-colors" />
+                <XCircle size={20} className="group-hover/stop:scale-110 transition-transform" />
               </button>
             )}
             <Button 
               onClick={handleForge} 
               isLoading={isRunning}
               disabled={!prompt.trim() && !isRunning}
-              className="px-6 shadow-lg"
+              className={`px-6 py-3 rounded-xl shadow-lg transition-all duration-300 font-bold tracking-wide ${(!prompt.trim() && !isRunning) ? 'opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-forge-accent to-forge-coder hover:scale-105 hover:shadow-forge-accent/40 border-0 text-white'}`}
             >
               Forge
             </Button>
