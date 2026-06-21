@@ -1,0 +1,74 @@
+# ==============================================================================
+# AgenticForge — Root Monorepo .gitignore
+# Scope: Top-level project root (/AgenticForge/.gitignore)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# CRITICAL: Environment & Secret Files — NEVER commit these
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+*.secret
+*.secrets
+secrets/
+credentials/
+
+# ------------------------------------------------------------------------------
+# OS Artifacts
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ------------------------------------------------------------------------------
+# Editor & IDE Configuration
+# ------------------------------------------------------------------------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.tmproj
+*.esproj
+
+# ------------------------------------------------------------------------------
+# Logs
+# ------------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# Planning / Temporary Documents (workspace scratch files, not product code)
+# These audit/planning docs at the root level should not be in the repo.
+# Move to /docs/ if you want to keep them, then gitignore the root-level ones.
+# ------------------------------------------------------------------------------
+AgenticForge_*.md
+Fullstack_Audit*.md
+Fullstack_Audit.md
+agenticforge.tsx
+*.docx
+resumeTemplate.docx
+2025-template_bullet.docx

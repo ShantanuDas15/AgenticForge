@@ -1,0 +1,129 @@
+# ==============================================================================
+# AgenticForge — Backend .dockerignore
+# Scope: /AgenticForge/backend/.dockerignore
+# Purpose: Prevents secrets, test data, dev caches, and bloat from entering
+#          the multi-stage Docker build context. The final runtime image
+#          targets a 128MB memory cap — every excluded byte counts.
+#
+# Build stages:
+#   builder  — python:3.14-slim (uv, pyproject.toml, uv.lock, dependency install)
+#   runtime  — python:3.14-slim (copies .venv and app code only)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# CRITICAL: Secrets & Local State — must never enter build context
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+
+# ------------------------------------------------------------------------------
+# CRITICAL: LangGraph SQLite Checkpoint Database
+# agentic_forge.db contains runtime conversation state and user-submitted
+# data. Baking it into the image would expose test data and inflate image size.
+# Production uses SUPABASE_DATABASE_URL (PostgreSQL) — SQLite is dev-only.
+# ------------------------------------------------------------------------------
+agentic_forge.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# ------------------------------------------------------------------------------
+# Python Virtual Environment
+# uv builds a fresh .venv inside the builder stage from pyproject.toml.
+# Copying the local .venv would (a) include dev-only packages, (b) break
+# cross-platform binary compatibility (Linux container ≠ dev host).
+# ------------------------------------------------------------------------------
+.venv/
+venv/
+env/
+
+# ------------------------------------------------------------------------------
+# Python Build Cache & Bytecode
+# __pycache__ bytecode is OS/arch-specific and regenerated on first run.
+# Including it adds dead weight to the image layers.
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*$py.class
+
+# ------------------------------------------------------------------------------
+# Test Infrastructure
+# Not needed at runtime — excluding keeps the attack surface minimal.
+# ------------------------------------------------------------------------------
+.pytest_cache/
+tests/
+e2e_*.py
+e2e_*.sh
+.coverage
+htmlcov/
+coverage.xml
+
+# ------------------------------------------------------------------------------
+# Version Control
+# Copying .git into a production image can expose commit history, author
+# emails, and branch metadata to anyone with image access.
+# ------------------------------------------------------------------------------
+.git/
+.gitignore
+.gitattributes
+
+# ------------------------------------------------------------------------------
+# Development Tooling & Editor Files
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.suo
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# ------------------------------------------------------------------------------
+# Documentation & Planning Artifacts
+# Not required at runtime. Reduces final image size.
+# ------------------------------------------------------------------------------
+*.md
+README*
+LICENSE
+CHANGELOG*
+docs/
+
+# ------------------------------------------------------------------------------
+# CI/CD Configuration (not needed inside the container)
+# ------------------------------------------------------------------------------
+.github/
+.gitlab-ci.yml
+.circleci/
+Jenkinsfile
+docker-compose*.yml
+*.dockerfile
+Makefile
+
+# ------------------------------------------------------------------------------
+# Logs
+# ------------------------------------------------------------------------------
+logs/
+*.log
+
+# ------------------------------------------------------------------------------
+# Alembic Migration Cache
+# Alembic scripts are included (they run at startup), but __pycache__ inside
+# the migrations folder is excluded via the global __pycache__ rule above.
+# ------------------------------------------------------------------------------
+# app/db/migrations/  ← DO NOT exclude — needed for `alembic upgrade head`
+
+# ------------------------------------------------------------------------------
+# Type Checking & Linting Artifacts
+# ------------------------------------------------------------------------------
+.mypy_cache/
+.ruff_cache/
+pyrightconfig.json

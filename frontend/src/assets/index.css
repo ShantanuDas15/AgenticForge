@@ -1,0 +1,70 @@
+/* ============================================================
+   AgenticForge — Global Design System
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Base Layer: Dark Mode Defaults --- */
+@layer base {
+  html {
+    @apply bg-forge-bg text-forge-text;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-forge-bg;
+    margin: 0;
+  }
+
+  #root {
+    @apply min-h-screen w-full;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Custom thin dark scrollbar scoped */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; }
+}
+
+/* --- Component Layer: Reusable Utility Classes --- */
+@layer components {
+
+  /* Glassmorphism card surface */
+  .glass-card {
+    @apply bg-forge-surface/80 backdrop-blur-md border border-forge-border rounded-xl;
+  }
+
+  /* Primary action button */
+  .btn-primary {
+    @apply bg-forge-accent hover:bg-purple-500 text-white font-semibold
+           px-5 py-2.5 rounded-lg transition-all duration-200
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Subtle secondary button */
+  .btn-ghost {
+    @apply bg-transparent hover:bg-forge-muted text-forge-muted-text
+           font-medium px-4 py-2 rounded-lg transition-all duration-200
+           border border-forge-border;
+  }
+
+  /* Agent status ring — colored border that animates */
+  .agent-ring-idle     { @apply ring-2 ring-forge-muted; }
+  .agent-ring-active   { @apply ring-2 ring-forge-accent ring-offset-2 ring-offset-forge-bg animate-pulse-slow; }
+  .agent-ring-complete { @apply ring-2 ring-forge-reviewer; }
+  .agent-ring-error    { @apply ring-2 ring-forge-error; }
+
+  /* Code block surface */
+  .code-surface {
+    @apply bg-[#0d0d14] font-mono text-sm text-forge-text
+           rounded-lg p-4 overflow-auto border border-forge-border;
+  }
+}

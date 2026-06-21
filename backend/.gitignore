@@ -1,0 +1,128 @@
+# ==============================================================================
+# AgenticForge — Backend .gitignore
+# Scope: /AgenticForge/backend/.gitignore
+# Stack: FastAPI, LangGraph, SQLAlchemy, Alembic, uv, Pydantic v2
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# CRITICAL: Secrets & Credentials — NEVER commit
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+*.p12
+
+# ------------------------------------------------------------------------------
+# CRITICAL: LangGraph SQLite Checkpoint Database
+# agentic_forge.db contains conversation history, agent state checkpoints,
+# and potentially user-submitted prompts. Must NEVER be committed.
+# The -journal and -wal files are SQLite transactional artifacts.
+# ------------------------------------------------------------------------------
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+agentic_forge.db
+
+# ------------------------------------------------------------------------------
+# Python Build & Cache Artifacts
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyc
+
+# ------------------------------------------------------------------------------
+# Virtual Environments
+# uv creates .venv by default. Both names are excluded for safety.
+# ------------------------------------------------------------------------------
+.venv/
+venv/
+env/
+.env/
+ENV/
+.python-version
+
+# ------------------------------------------------------------------------------
+# uv Lockfile — Include or exclude based on your policy:
+#   - INCLUDE uv.lock for reproducible builds in production (recommended).
+#   - EXCLUDE if you want contributors to regenerate it.
+# Current recommendation: COMMIT uv.lock (uncomment the line below to exclude).
+# ------------------------------------------------------------------------------
+# uv.lock
+
+# ------------------------------------------------------------------------------
+# Testing & Coverage Artifacts
+# ------------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.coveragerc
+.tox/
+.nox/
+
+# ------------------------------------------------------------------------------
+# End-to-End & Ad-hoc Test Scripts (root-level, not in /tests/)
+# These are development-only scripts that should not ship in a public repo
+# unless you explicitly move them to tests/ and document them.
+# ------------------------------------------------------------------------------
+e2e_*.py
+e2e_*.sh
+
+# ------------------------------------------------------------------------------
+# Alembic — Commit migrations but not local override ini
+# The alembic.ini sqlalchemy.url line (driver://user:pass@...) is safe to
+# commit only because it's a placeholder. If you ever put a real URL there,
+# add it to this list.
+# ------------------------------------------------------------------------------
+# alembic.ini  ← keep committed, it has only a placeholder URL
+
+# ------------------------------------------------------------------------------
+# Distribution & Packaging
+# ------------------------------------------------------------------------------
+dist/
+build/
+*.egg-info/
+*.egg
+sdist/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+MANIFEST
+
+# ------------------------------------------------------------------------------
+# Type Checking
+# ------------------------------------------------------------------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+pyrightconfig.json
+
+# ------------------------------------------------------------------------------
+# Profiling & Benchmarks
+# ------------------------------------------------------------------------------
+*.prof
+*.lprof
+
+# ------------------------------------------------------------------------------
+# Jupyter / Notebooks (if any data science exploration exists)
+# ------------------------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb
+
+# ------------------------------------------------------------------------------
+# OS Artifacts (redundant safety net)
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
