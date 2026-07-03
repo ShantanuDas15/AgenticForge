@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
             .replace("postgresql+psycopg://",  "postgresql://")
             .replace("postgresql+asyncpg://",   "postgresql://")
         )
-        async with await AsyncPostgresSaver.from_conn_string(_pg_url) as checkpointer:
+        async with AsyncPostgresSaver.from_conn_string(_pg_url) as checkpointer:
             await checkpointer.setup()  # Idempotent: creates checkpoint tables if absent
             compile_graph(checkpointer)
             logger.info(
