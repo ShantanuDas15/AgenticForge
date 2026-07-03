@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM python:3.14-slim AS builder
+FROM python:3.12-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -17,7 +17,7 @@ RUN uv venv /app/.venv && \
     uv pip install --system --python /app/.venv -r pyproject.toml
 
 # Stage 2: Runtime
-FROM python:3.14-slim
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

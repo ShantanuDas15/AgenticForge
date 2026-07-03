@@ -29,27 +29,39 @@ from app.services.agents.workflow import compile_graph
 async def lifespan(app: FastAPI):
     """
     Manages the full application lifecycle using the modern FastAPI lifespan pattern.
-    Code before `yield` runs on startup; code after `yield` runs on shutdown.
 
-    Startup sequence:
-      1. Open the async SQLite connection for the LangGraph checkpointer.
-         This replaces the in-process MemorySaver — checkpoints now survive
-         process restarts, container redeployments, and uvicorn reloads.
-      2. Compile the LangGraph workflow with the durable checkpointer.
-      3. Log the startup confirmation.
+    Startup sequence (environment-aware):
+      PRODUCTION  → AsyncPostgresSaver on Supabase (durable, survives redeployments)
+      DEVELOPMENT → AsyncSqliteSaver on local .db file (zero-config local dev)
 
-    The `async with` block keeps the aiosqlite connection alive for the full
-    application lifetime and closes it cleanly on shutdown.
+    In both cases the compiled LangGraph graph is stored on the module-level
+    `wf_module.graph` reference and is shared across all requests for the
+    lifetime of the process.
     """
-    async with AsyncSqliteSaver.from_conn_string(settings.DATABASE_URL.replace("sqlite:///", "")) as checkpointer:
-        compile_graph(checkpointer)
-        logger.info(
-            f"Starting {settings.PROJECT_NAME} in {settings.ENVIRONMENT} mode. "
-            f"Checkpointer: AsyncSqliteSaver ({settings.DATABASE_URL})"
-        )
-        yield
-        # --- Shutdown: aiosqlite connection closed automatically by context manager ---
-        logger.info(f"Shutting down {settings.PROJECT_NAME}.")
+    if settings.ENVIRONMENT == "production" and settings.SUPABASE_DATABASE_URL:
+        from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+        async with await AsyncPostgresSaver.from_conn_string(
+            settings.SUPABASE_DATABASE_URL
+        ) as checkpointer:
+            await checkpointer.setup()  # Idempotent: creates checkpoint tables if absent
+            compile_graph(checkpointer)
+            logger.info(
+                f"Starting {settings.PROJECT_NAME} in PRODUCTION mode. "
+                f"Checkpointer: AsyncPostgresSaver (Supabase PostgreSQL)"
+            )
+            yield
+            logger.info(f"Shutting down {settings.PROJECT_NAME}.")
+    else:
+        async with AsyncSqliteSaver.from_conn_string(
+            settings.DATABASE_URL.replace("sqlite:///", "")
+        ) as checkpointer:
+            compile_graph(checkpointer)
+            logger.info(
+                f"Starting {settings.PROJECT_NAME} in {settings.ENVIRONMENT} mode. "
+                f"Checkpointer: AsyncSqliteSaver ({settings.DATABASE_URL})"
+            )
+            yield
+            logger.info(f"Shutting down {settings.PROJECT_NAME}.")
 
 
 
