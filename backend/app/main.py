@@ -22,6 +22,7 @@ Base.metadata.create_all(bind=engine)
 
 
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from app.services.agents.workflow import compile_graph
 
 
