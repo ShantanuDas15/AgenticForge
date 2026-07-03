@@ -40,9 +40,15 @@ async def lifespan(app: FastAPI):
     """
     if settings.ENVIRONMENT == "production" and settings.SUPABASE_DATABASE_URL:
         from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-        async with await AsyncPostgresSaver.from_conn_string(
+        # AsyncPostgresSaver uses psycopg3 which requires the plain "postgresql://" scheme.
+        # SQLAlchemy-style dialect prefixes (e.g. "+psycopg2", "+asyncpg") must be stripped.
+        _pg_url = (
             settings.SUPABASE_DATABASE_URL
-        ) as checkpointer:
+            .replace("postgresql+psycopg2://", "postgresql://")
+            .replace("postgresql+psycopg://",  "postgresql://")
+            .replace("postgresql+asyncpg://",   "postgresql://")
+        )
+        async with await AsyncPostgresSaver.from_conn_string(_pg_url) as checkpointer:
             await checkpointer.setup()  # Idempotent: creates checkpoint tables if absent
             compile_graph(checkpointer)
             logger.info(
