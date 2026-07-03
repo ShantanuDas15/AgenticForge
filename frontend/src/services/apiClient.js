@@ -149,6 +149,21 @@ apiClient.interceptors.response.use(
         return Promise.reject(new Error(detail));
       }
       
+      // Surface field-level Pydantic errors when present (RequestValidationError path only).
+      // Custom ValidationError exceptions also return 422 but carry no `errors` array — the
+      // array presence check is the discriminator, so those paths are completely unaffected.
+      const pydanticErrors = error.response?.data?.errors;
+      if (pydanticErrors?.length > 0) {
+        const fieldMessages = pydanticErrors
+          .map(e => {
+            const field = e.loc?.length > 0 ? e.loc[e.loc.length - 1] : 'field';
+            return `${field}: ${e.msg}`;
+          })
+          .join(' · ');
+        useUIStore.getState().addToast(fieldMessages, 'error');
+        return Promise.reject(new Error(fieldMessages));
+      }
+
       useUIStore.getState().addToast(errorCode ? `[${errorCode}] ${detail}` : detail, 'error');
       
       if (error.config?.url?.includes('/history') || error.config?.url?.includes('/forge')) {

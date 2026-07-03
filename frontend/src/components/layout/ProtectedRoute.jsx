@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import useAuthStore from '@/store/useAuthStore';
 import useSettingsStore from '@/store/useSettingsStore';
 import apiClient from '@/services/apiClient';
+import useBillingStream from '@/hooks/useBillingStream';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { API_ROUTES } from '@/config/constants';
@@ -12,6 +13,7 @@ import { API_ROUTES } from '@/config/constants';
  * and violently redirects them to the login wall.
  */
 function ProtectedRoute() {
+  useBillingStream(); // ponytail: hook must be called unconditionally before any early returns
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isActive = useAuthStore((state) => state.isActive);
   const sessionExpired = useAuthStore((state) => state.sessionExpired);

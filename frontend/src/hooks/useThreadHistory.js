@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import apiClient from '@/services/apiClient';
-import useFlowStore from '@/store/useFlowStore';
+import useFlowStore, { inferLanguage } from '@/store/useFlowStore';
 import { API_ROUTES } from '@/config/constants';
 
 /**
@@ -50,7 +50,7 @@ function useThreadHistory(threadId) {
           useFlowStore.setState({
             currentPlan: finalPlan,
             currentCode: finalCode,
-            workspaceFiles: workspaceFiles,
+            workspaceFiles: workspaceFiles.map(f => ({ ...f, language: f.language || inferLanguage(f.filename) })),
             workflowStatus: isInterrupted ? 'interrupted' : 'complete',
             interrupted: isInterrupted,
             interruptState: isInterrupted ? lastTurn.state : null
@@ -61,10 +61,13 @@ function useThreadHistory(threadId) {
 
       } catch (err) {
         if (!isMounted) return;
-        
-        // 404 simply means this is a newly generated UUID from the client 
-        // that hasn't had any WebSocket messages saved to the DB yet.
-        // We gracefully ignore it.
+
+        if (err.response?.status === 403 || err.message?.includes('403')) {
+          // ponytail: interceptor handles toast+redirect; we just need the canvas log
+          useFlowStore.getState().appendLog('system', 'Access denied: this thread belongs to another account.');
+          return;
+        }
+
         const status = err.message.includes('404') || err.response?.status === 404;
         if (!status) {
           console.error('[History Hydration Error]', err);

@@ -1,5 +1,13 @@
 import { create } from 'zustand';
 
+// ponytail: colocated here — only caller; no need for a separate utils file
+export const inferLanguage = (filename = '') => {
+  const ext = filename.split('.').pop().toLowerCase();
+  return { py: 'python', js: 'javascript', jsx: 'javascript', ts: 'typescript',
+           tsx: 'typescript', html: 'html', css: 'css', json: 'json',
+           md: 'markdown', sh: 'shell', yml: 'yaml', yaml: 'yaml' }[ext] || 'plaintext';
+};
+
 /**
  * Initial React Flow node layout.
  * Three agents arranged horizontally: Planner → Coder → Reviewer.
@@ -107,8 +115,9 @@ const useFlowStore = create((set, get) => ({
         });
       }
 
-      const updatedWorkspaceFiles = stateUpdate?.workspace_files || 
-          (stateUpdate?.current_code ? [{ filename: 'main.py', content: stateUpdate.current_code, language: 'python' }] : state.workspaceFiles);
+      const updatedWorkspaceFiles = stateUpdate?.workspace_files
+          ? stateUpdate.workspace_files.map(f => ({ ...f, language: f.language || inferLanguage(f.filename) }))
+          : (stateUpdate?.current_code ? [{ filename: 'main.py', content: stateUpdate.current_code, language: inferLanguage('main.py') }] : state.workspaceFiles);
           
       const updatedFileHistory = { ...state.fileHistory };
       updatedWorkspaceFiles.forEach(file => {
@@ -233,7 +242,7 @@ const useFlowStore = create((set, get) => ({
         state.setAgentActive('reviewer');
         state.appendLog('reviewer', 'Reviewing code (REST Fallback)...');
         setTimeout(() => {
-          state.setAgentComplete('reviewer', { reviewer_feedback: 'APPROVED' });
+          state.setAgentComplete('reviewer', { reviewer_feedback: 'APPROVED', workspace_files: data.workspace_files });
           state.setWorkflowStatus('complete');
           state.appendLog('system', 'REST API generation complete.');
         }, 500);

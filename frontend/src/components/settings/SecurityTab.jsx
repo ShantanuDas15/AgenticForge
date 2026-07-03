@@ -39,7 +39,7 @@ export default function SecurityTab() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
+      if (err.response?.status === 400 || err.response?.status === 401 || err.response?.status === 403) {
         setError(err.response?.data?.detail || 'Incorrect current password.');
       } else {
         useUIStore.getState().addToast(err.response?.data?.detail || 'Failed to update password.', 'error');

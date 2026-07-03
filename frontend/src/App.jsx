@@ -24,15 +24,12 @@ function PageLoader() {
   );
 }
 
-import useBillingStream from '@/hooks/useBillingStream';
 
 /**
  * App — Root routing component.
  * Features React.lazy route splitting, ProtectedRoutes for auth, and global UI containers.
  */
 function App() {
-  useBillingStream();
-
   return (
     <>
       <ToastContainer />

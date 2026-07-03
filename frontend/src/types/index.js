@@ -30,7 +30,7 @@
  * @property {string} [final_plan] - The final technical plan.
  * @property {string} [final_code] - The final generated code.
  * @property {number} iterations_taken - Iterations consumed.
- * @property {number} [total_tokens] - Total tokens consumed.
+ * @property {number} total_tokens - Total tokens consumed.
  */
 
 /**

@@ -4,6 +4,7 @@ import apiClient from '@/services/apiClient';
 import useUIStore from '@/store/useUIStore';
 import useAuthStore from '@/store/useAuthStore';
 import Button from '@/components/common/Button';
+import ConfirmModal from '@/components/common/ConfirmModal';
 import { API_ROUTES } from '@/config/constants';
 
 /**
@@ -13,6 +14,7 @@ function BillingTab() {
   const [tier, setTier] = useState('Loading...');
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isDowngrading, setIsDowngrading] = useState(false);
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
 
   useEffect(() => {
     const isUpgradeSuccess = new URLSearchParams(window.location.search).get('upgrade') === 'success';
@@ -56,7 +58,7 @@ function BillingTab() {
   };
 
   const handleDowngrade = async () => {
-    if (!window.confirm("Are you sure you want to downgrade?")) return;
+    setShowDowngradeModal(false); // ponytail: close modal before async starts
     
     setIsDowngrading(true);
     try {
@@ -113,7 +115,7 @@ function BillingTab() {
           {isPro && (
             <Button 
               className="w-full py-3.5 text-sm bg-zinc-800 hover:bg-zinc-700 text-white"
-              onClick={handleDowngrade}
+              onClick={() => setShowDowngradeModal(true)}
               isLoading={isDowngrading}
             >
               Downgrade to Free
@@ -154,6 +156,16 @@ function BillingTab() {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showDowngradeModal}
+        onClose={() => setShowDowngradeModal(false)}
+        onConfirm={handleDowngrade}
+        title="Downgrade Subscription"
+        message="You will lose Cloud Deployment and GitHub integration immediately. Are you sure?"
+        confirmText="Downgrade"
+        isDanger={true}
+        isLoading={isDowngrading}
+      />
     </div>
   );
 }

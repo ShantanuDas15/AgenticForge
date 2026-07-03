@@ -70,11 +70,12 @@ function ResetPassword() {
       useUIStore.getState().addToast('Password successfully reset. You can now log in.', 'success');
       navigate('/login');
     } catch (err) {
-      const msg = err.response?.data?.detail || err.message || 'Failed to reset password.';
-      if (err.response?.status === 422 || msg.toLowerCase().includes('token') || msg.toLowerCase().includes('expired')) {
-        setErrors({ token: msg });
+      const errorCode = err.response?.data?.error_code;
+      // ponytail: VALIDATION_ERROR on this route == bad/expired token; show inline, not toast
+      if (errorCode === 'VALIDATION_ERROR') {
+        setErrors({ token: 'This reset link has expired or is invalid. Please request a new one.' });
       } else {
-        useUIStore.getState().addToast(msg, 'error');
+        useUIStore.getState().addToast(err.response?.data?.detail || err.message || 'Failed to reset password.', 'error');
       }
     } finally {
       setIsLoading(false);

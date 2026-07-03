@@ -38,6 +38,7 @@ function UsageChart() {
               cursor={{ fill: '#27272a', opacity: 0.4 }} 
               contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)' }}
               itemStyle={{ color: '#a855f7', fontWeight: 'bold' }}
+              labelFormatter={(label, payload) => payload?.[0]?.payload?.full_date || label}
             />
             <Bar dataKey="tokens" fill="#a855f7" radius={[4, 4, 0, 0]} />
           </BarChart>
