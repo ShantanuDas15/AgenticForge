@@ -11,6 +11,7 @@ const Workspace = React.lazy(() => import('@/pages/Workspace'));
 const Login = React.lazy(() => import('@/pages/Login'));
 const AccountBilling = React.lazy(() => import('@/pages/AccountBilling'));
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
+const AuthCallback = React.lazy(() => import('@/pages/AuthCallback'));
 
 /**
  * Loading fallback for Suspense while downloading route chunks.
@@ -39,6 +40,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             
             <Route element={<ProtectedRoute />}>
               <Route path="/"          element={<Dashboard />} />

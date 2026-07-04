@@ -119,3 +119,92 @@ def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
         }
     except JWTError:
         raise ValidationError("Invalid or expired refresh token")
+
+# ─── Google OAuth 2.0 ──────────────────────────────────────────────────────
+
+import httpx
+import json as _json
+from urllib.parse import urlencode
+from fastapi.responses import RedirectResponse as _Redirect
+
+_GOOGLE_AUTH_URL  = "https://accounts.google.com/o/oauth2/v2/auth"
+_GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+_GOOGLE_INFO_URL  = "https://www.googleapis.com/oauth2/v3/userinfo"
+
+
+@router.get("/google/login")
+def google_login():
+    """Redirect the browser to Google's OAuth consent screen."""
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=501, detail="Google OAuth not configured")
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account",
+    }
+    return _Redirect(f"{_GOOGLE_AUTH_URL}?{urlencode(params)}")
+
+
+@router.get("/google/callback")
+async def google_callback(code: str, db: Session = Depends(get_db)):
+    """Exchange auth code → upsert user → redirect to frontend with JWT."""
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=501, detail="Google OAuth not configured")
+
+    # 1. Exchange authorization code for Google tokens
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(_GOOGLE_TOKEN_URL, data={
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        })
+    if token_res.status_code != 200:
+        raise HTTPException(status_code=400, detail="Failed to exchange Google auth code")
+    google_access_token = token_res.json()["access_token"]
+
+    # 2. Fetch Google user profile
+    async with httpx.AsyncClient() as client:
+        info_res = await client.get(
+            _GOOGLE_INFO_URL,
+            headers={"Authorization": f"Bearer {google_access_token}"},
+        )
+    if info_res.status_code != 200:
+        raise HTTPException(status_code=400, detail="Failed to fetch Google user profile")
+    profile = info_res.json()
+
+    email     = profile["email"]
+    name      = profile.get("name", email.split("@")[0])
+    google_id = profile["sub"]  # stable, opaque Google user ID
+
+    # 3. Upsert: google_id → email match → new user
+    user = db.query(User).filter(User.google_id == google_id).first()
+    if not user:
+        user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(email=email, name=name, google_id=google_id, hashed_password=None)
+        db.add(user)
+    elif not user.google_id:
+        user.google_id = google_id  # link Google to existing password account
+    db.commit()
+    db.refresh(user)
+
+    # 4. Issue our own JWT tokens (identical shape to /auth/login response)
+    access_token  = create_access_token(data={"sub": user.email})
+    refresh_token = create_refresh_token(data={"sub": user.email})
+
+    # 5. Redirect to frontend callback page with tokens in query string
+    user_data = {
+        "id": user.id, "email": user.email, "name": user.name,
+        "subscription_tier": user.subscription_tier, "is_active": user.is_active,
+    }
+    qs = urlencode({
+        "access_token":  access_token,
+        "refresh_token": refresh_token,
+        "user":          _json.dumps(user_data),
+    })
+    return _Redirect(f"{settings.FRONTEND_URL}/auth/callback?{qs}")

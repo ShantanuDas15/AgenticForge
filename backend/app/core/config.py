@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_SECRET: Optional[str] = None
     GITHUB_REDIRECT_URI: Optional[str] = None
     
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    
     # Cloud Deployment
     FRONTEND_URL: str = "http://localhost:5173"
     VERCEL_ACCESS_TOKEN: Optional[str] = None
