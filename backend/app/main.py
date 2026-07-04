@@ -17,8 +17,13 @@ from app.core.logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# Create all database tables (fallback for SQLite development)
-Base.metadata.create_all(bind=engine)
+# Create all database tables in development (SQLite) only.
+# In production, Alembic (start.sh) manages the schema exclusively.
+# Calling create_all() in production would silently create tables without
+# an alembic_version record, causing "DuplicateTable" errors on next deploy.
+if settings.ENVIRONMENT != "production":
+    Base.metadata.create_all(bind=engine)
+
 
 
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
