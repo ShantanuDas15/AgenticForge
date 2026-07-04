@@ -1,0 +1,91 @@
+name: AgenticForge CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Backend Lint & Test ─────────────────────────────────────────────────────
+  backend-test:
+    name: Backend — Test & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+        env:
+          SECRET_KEY: "ci-test-secret-key-minimum-32-characters-x"
+          ENCRYPTION_KEY: ${{ secrets.TEST_ENCRYPTION_KEY }}
+          ENVIRONMENT: development
+          DATABASE_URL: "sqlite:///./test.db"
+
+  # ── Frontend Build Check ────────────────────────────────────────────────────
+  frontend-build:
+    name: Frontend — Build Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: https://agenticforge-lznh.onrender.com/api/v1
+          VITE_WS_BASE_URL: wss://agenticforge-lznh.onrender.com
+
+  # ── Deploy Backend (main push only) ────────────────────────────────────────
+  deploy-backend:
+    name: Deploy — Render (Backend)
+    needs: backend-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            -o /dev/null \
+            && echo "✅ Render deploy triggered" \
+            || (echo "❌ Render deploy hook failed" && exit 1)
+
+  # ── Deploy Frontend (Vercel auto-deploys via GitHub integration) ────────────
+  deploy-frontend:
+    name: Deploy — Vercel (Frontend)
+    needs: frontend-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Vercel deploys automatically
+        run: echo "✅ Vercel auto-deploys on push via GitHub integration. No action needed."

@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { KeyRound, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { KeyRound, ShieldCheck, Eye, EyeOff, Trash2, AlertTriangle } from 'lucide-react';
 import useUIStore from '@/store/useUIStore';
+import useAuthStore from '@/store/useAuthStore';
 import apiClient from '@/services/apiClient';
 import Button from '@/components/common/Button';
 import { API_ROUTES } from '@/config/constants';
+import { useNavigate } from 'react-router-dom';
 
 export default function SecurityTab() {
+  const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,6 +17,27 @@ export default function SecurityTab() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Account deletion state
+  const [showDeleteZone, setShowDeleteZone] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const isDeleteReady = deleteConfirmText === 'DELETE';
+
+  const handleDeleteAccount = async () => {
+    if (!isDeleteReady) return;
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(API_ROUTES.USERS.ME);
+      useAuthStore.getState().logout();
+      useUIStore.getState().addToast('Account permanently deleted.', 'success');
+      navigate('/login', { replace: true });
+    } catch (err) {
+      useUIStore.getState().addToast('Failed to delete account. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -146,6 +170,74 @@ export default function SecurityTab() {
           </Button>
         </div>
       </form>
+
+      {/* ── Danger Zone ──────────────────────────────────────────────── */}
+      <div className="mt-10 border border-red-500/20 rounded-xl overflow-hidden">
+        <div className="px-6 py-4 bg-red-500/5 border-b border-red-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={18} className="text-red-400" />
+            <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">Danger Zone</h3>
+          </div>
+          {!showDeleteZone && (
+            <button
+              onClick={() => setShowDeleteZone(true)}
+              className="text-xs font-semibold text-red-400/70 hover:text-red-400 border border-red-500/30 hover:border-red-500/60 px-3 py-1.5 rounded-lg transition-all"
+            >
+              Delete Account
+            </button>
+          )}
+        </div>
+
+        {showDeleteZone && (
+          <div className="px-6 py-5 space-y-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex gap-3">
+              <Trash2 size={20} className="text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-forge-text">Permanently delete your account</p>
+                <p className="text-xs text-forge-muted-text mt-1 leading-relaxed">
+                  This will immediately and irreversibly delete your account, all projects, and all agent history.
+                  <strong className="text-red-400"> This action cannot be undone.</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-forge-muted-text uppercase tracking-wider">
+                Type <span className="text-red-400 font-mono">DELETE</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full max-w-xs bg-zinc-900 border border-red-500/30 rounded-lg py-2.5 px-4 text-forge-text font-mono text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/50 transition-all placeholder-zinc-600"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-1">
+              <Button
+                onClick={handleDeleteAccount}
+                isLoading={isDeleting}
+                disabled={!isDeleteReady || isDeleting}
+                className={`px-6 py-2.5 text-sm transition-all ${
+                  isDeleteReady
+                    ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/30'
+                    : 'bg-red-600/30 text-red-400/50 cursor-not-allowed'
+                }`}
+              >
+                <Trash2 size={14} className="mr-1.5" />
+                Delete My Account
+              </Button>
+              <button
+                onClick={() => { setShowDeleteZone(false); setDeleteConfirmText(''); }}
+                className="text-sm text-forge-muted-text hover:text-forge-text transition-colors px-3 py-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
