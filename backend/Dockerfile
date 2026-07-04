@@ -35,10 +35,13 @@ COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
 # Copy the rest of the application code
 COPY --chown=appuser:appuser . .
 
+# Make the startup script executable
+RUN chmod +x /app/start.sh
+
 # Switch to the non-root user for execution
 USER appuser
 
 EXPOSE 8000
 
-# Run the FastAPI application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run migrations then start the FastAPI application
+CMD ["/bin/bash", "/app/start.sh"]
